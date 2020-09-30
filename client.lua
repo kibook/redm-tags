@@ -68,6 +68,10 @@ function DrawText3D(x, y, z, text)
 	DisplayText(CreateVarString(10, "LITERAL_STRING", text), screenX, screenY)
 end
 
+function GetPedCrouchMovement(ped)
+	return Citizen.InvokeNative(0xD5FE956C70FF370B, ped)
+end
+
 function DrawTags()
 	local myPed = PlayerPedId()
 	local x1, y1, z1 = table.unpack(GetEntityCoords(myPed))
@@ -77,7 +81,7 @@ function DrawTags()
 			local ped = GetPlayerPed(playerId)
 			local x2, y2, z2 = table.unpack(GetEntityCoords(ped))
 
-			if GetDistanceBetweenCoords(x1, y1, z1, x2, y2, z2, true) <= TagDrawDistance then
+			if GetDistanceBetweenCoords(x1, y1, z1, x2, y2, z2, true) <= TagDrawDistance and not GetPedCrouchMovement(ped) then
 				DrawText3D(x2, y2, z2 + 1, GetPlayerName(playerId))
 			end
 		end
