@@ -1,5 +1,7 @@
 local ShowPlayerNames = false
-local ShowEntityTags = false
+local ShowPedIds = false
+local ShowVehIds = false
+local ShowObjIds = false
 local TagDrawDistance = 50
 
 RegisterCommand('playernames', function(source, args, raw)
@@ -7,11 +9,34 @@ RegisterCommand('playernames', function(source, args, raw)
 end, false)
 
 RegisterCommand('entids', function(source, args, raw)
-	ShowEntityTags = not ShowEntityTags
+	if ShowPedIds or ShowVehIds or ShowObjIds then
+		ShowPedIds = false
+		ShowVehIds = false
+		ShowObjIds = false
+	else
+		ShowPedIds = true
+		ShowVehIds = true
+		ShowObjIds = true
+	end
+end, false)
+
+RegisterCommand('pedids', function(source, args, raw)
+	ShowPedIds = not ShowPedIds
+end, false)
+
+RegisterCommand('vehids', function(source, args, raw)
+	ShowVehIds = not ShowVehIds
+end, false)
+
+RegisterCommand('objids', function(source, args, raw)
+	ShowObjIds = not ShowObjIds
 end, false)
 
 TriggerEvent('chat:addSuggestion', '/playernames', 'Show/hide player names', {})
 TriggerEvent('chat:addSuggestion', '/entids', 'Show/hide entity IDs', {})
+TriggerEvent('chat:addSuggestion', '/pedids', 'Show/hide ped IDs', {})
+TriggerEvent('chat:addSuggestion', '/vehids', 'Show/hide vehicle IDs', {})
+TriggerEvent('chat:addSuggestion', '/objids', 'Show/hide object IDs', {})
 
 local entityEnumerator = {
 	__gc = function(enum)
@@ -87,7 +112,7 @@ function DrawTags()
 		end
 	end
 
-	if ShowEntityTags then
+	if ShowPedIds then
 		for ped in EnumeratePeds() do
 			if not IsPedAPlayer(ped) then
 				local x2, y2, z2 = table.unpack(GetEntityCoords(ped))
@@ -97,7 +122,9 @@ function DrawTags()
 				end
 			end
 		end
+	end
 
+	if ShowVehIds then
 		for vehicle in EnumerateVehicles() do
 			local x2, y2, z2 = table.unpack(GetEntityCoords(vehicle))
 
@@ -105,7 +132,9 @@ function DrawTags()
 				DrawText3D(x2, y2, z2 + 1, string.format('veh %x', vehicle))
 			end
 		end
+	end
 
+	if ShowObjIds then
 		for object in EnumerateObjects() do
 			local x2, y2, z2 = table.unpack(GetEntityCoords(object))
 
@@ -119,7 +148,7 @@ end
 CreateThread(function()
 	while true do
 		Wait(0)
-		if ShowPlayerNames or ShowEntityTags then
+		if ShowPlayerNames or ShowPedIds or ShowVehIds or ShowObjIds then
 			DrawTags()
 		end
 	end
