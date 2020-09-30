@@ -89,7 +89,7 @@ function DrawTags()
 				local x2, y2, z2 = table.unpack(GetEntityCoords(ped))
 
 				if GetDistanceBetweenCoords(x1, y1, z1, x2, y2, z2, true) <= TagDrawDistance then
-					DrawText3D(x2, y2, z2 + 1, string.format('%x', ped))
+					DrawText3D(x2, y2, z2 + 1, string.format('ped %x', ped))
 				end
 			end
 		end
@@ -98,7 +98,7 @@ function DrawTags()
 			local x2, y2, z2 = table.unpack(GetEntityCoords(vehicle))
 
 			if GetDistanceBetweenCoords(x1, y1, z1, x2, y2, z2, true) <= TagDrawDistance then
-				DrawText3D(x2, y2, z2 + 1, string.format('%x', vehicle))
+				DrawText3D(x2, y2, z2 + 1, string.format('veh %x', vehicle))
 			end
 		end
 
@@ -106,7 +106,7 @@ function DrawTags()
 			local x2, y2, z2 = table.unpack(GetEntityCoords(object))
 
 			if GetDistanceBetweenCoords(x1, y1, z1, x2, y2, z2, true) <= TagDrawDistance then
-				DrawText3D(x2, y2, z2 + 1, string.format('%x', object))
+				DrawText3D(x2, y2, z2 + 1, string.format('obj %x', object))
 			end
 		end
 	end
