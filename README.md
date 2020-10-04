@@ -2,6 +2,9 @@
 
 A script to display player names above players, as well as entity IDs above all entities.
 
+## Example
+[![Example](https://i.imgur.com/kejitNRm.jpg)](https://imgur.com/kejitNR)
+
 ## Commands
 
 | Command        | Description                       |
