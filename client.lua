@@ -3,6 +3,7 @@ local ShowPedIds = false
 local ShowVehIds = false
 local ShowObjIds = false
 local TagDrawDistance = 50
+local HudIsRevealed = false
 
 RegisterCommand('playernames', function(source, args, raw)
 	ShowPlayerNames = not ShowPlayerNames
@@ -88,7 +89,7 @@ function DrawText3D(x, y, z, text)
 
 	SetTextScale(0.35, 0.35)
 	SetTextFontForCurrentCommand(1)
-	SetTextColor(255, 255, 255, 255)
+	SetTextColor(255, 255, 255, 223)
 	SetTextCentre(1)
 	DisplayText(CreateVarString(10, "LITERAL_STRING", text), screenX, screenY)
 end
@@ -97,11 +98,18 @@ function GetPedCrouchMovement(ped)
 	return Citizen.InvokeNative(0xD5FE956C70FF370B, ped)
 end
 
+function OnRevealHud()
+	HudIsRevealed = true
+	SetTimeout(3000, function()
+		HudIsRevealed = false
+	end)
+end
+
 function DrawTags()
 	local myPed = PlayerPedId()
 	local x1, y1, z1 = table.unpack(GetEntityCoords(myPed))
 
-	if ShowPlayerNames then
+	if ShowPlayerNames or HudIsRevealed then
 		for _, playerId in ipairs(GetActivePlayers()) do
 			local ped = GetPlayerPed(playerId)
 			local x2, y2, z2 = table.unpack(GetEntityCoords(ped))
@@ -148,7 +156,12 @@ end
 CreateThread(function()
 	while true do
 		Wait(0)
-		if ShowPlayerNames or ShowPedIds or ShowVehIds or ShowObjIds then
+
+		if IsControlJustPressed(0, 0xCF8A4ECA) then
+			OnRevealHud()
+		end
+
+		if ShowPlayerNames or ShowPedIds or ShowVehIds or ShowObjIds or HudIsRevealed then
 			DrawTags()
 		end
 	end
