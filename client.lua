@@ -107,15 +107,15 @@ end
 
 function DrawTags()
 	local myPed = PlayerPedId()
-	local x1, y1, z1 = table.unpack(GetEntityCoords(myPed))
+	local myCoords = GetEntityCoords(myPed)
 
 	if ShowPlayerNames or HudIsRevealed then
 		for _, playerId in ipairs(GetActivePlayers()) do
 			local ped = GetPlayerPed(playerId)
-			local x2, y2, z2 = table.unpack(GetEntityCoords(ped))
+			local pedCoords = GetEntityCoords(ped)
 
-			if GetDistanceBetweenCoords(x1, y1, z1, x2, y2, z2, true) <= TagDrawDistance and not GetPedCrouchMovement(ped) then
-				DrawText3D(x2, y2, z2 + 1, GetPlayerName(playerId))
+			if #(myCoords - pedCoords) <= TagDrawDistance and not GetPedCrouchMovement(ped) then
+				DrawText3D(pedCoords.x, pedCoords.y, pedCoords.z + 1, GetPlayerName(playerId))
 			end
 		end
 	end
@@ -123,10 +123,10 @@ function DrawTags()
 	if ShowPedIds then
 		for ped in EnumeratePeds() do
 			if not IsPedAPlayer(ped) then
-				local x2, y2, z2 = table.unpack(GetEntityCoords(ped))
+				local pedCoords = GetEntityCoords(ped)
 
-				if GetDistanceBetweenCoords(x1, y1, z1, x2, y2, z2, true) <= TagDrawDistance then
-					DrawText3D(x2, y2, z2 + 1, string.format('ped %x', ped))
+				if #(myCoords - pedCoords) <= TagDrawDistance then
+					DrawText3D(pedCoords.x, pedCoords.y, pedCoords.z + 1, string.format('ped %x', ped))
 				end
 			end
 		end
@@ -134,20 +134,20 @@ function DrawTags()
 
 	if ShowVehIds then
 		for vehicle in EnumerateVehicles() do
-			local x2, y2, z2 = table.unpack(GetEntityCoords(vehicle))
+			local vehCoords = GetEntityCoords(vehicle)
 
-			if GetDistanceBetweenCoords(x1, y1, z1, x2, y2, z2, true) <= TagDrawDistance then
-				DrawText3D(x2, y2, z2 + 1, string.format('veh %x', vehicle))
+			if #(myCoords - vehCoords) <= TagDrawDistance then
+				DrawText3D(vehCoords.x, vehCoords.y, vehCoords.z + 1, string.format('veh %x', vehicle))
 			end
 		end
 	end
 
 	if ShowObjIds then
 		for object in EnumerateObjects() do
-			local x2, y2, z2 = table.unpack(GetEntityCoords(object))
+			local objCoords = GetEntityCoords(object)
 
-			if GetDistanceBetweenCoords(x1, y1, z1, x2, y2, z2, true) <= TagDrawDistance then
-				DrawText3D(x2, y2, z2 + 1, string.format('obj %x', object))
+			if #(myCoords - objCoords) <= TagDrawDistance then
+				DrawText3D(objCoords.x, objCoords.y, objCoords.z + 1, string.format('obj %x', object))
 			end
 		end
 	end
