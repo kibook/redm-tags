@@ -4,6 +4,8 @@ local ShowVehIds = false
 local ShowObjIds = false
 local TagDrawDistance = 50
 local HudIsRevealed = false
+local ActivePlayers = {}
+local MyCoords = vector3(0, 0, 0)
 
 RegisterCommand('playernames', function(source, args, raw)
 	ShowPlayerNames = not ShowPlayerNames
@@ -32,12 +34,6 @@ end, false)
 RegisterCommand('objids', function(source, args, raw)
 	ShowObjIds = not ShowObjIds
 end, false)
-
-TriggerEvent('chat:addSuggestion', '/playernames', 'Show/hide player names', {})
-TriggerEvent('chat:addSuggestion', '/entids', 'Show/hide entity IDs', {})
-TriggerEvent('chat:addSuggestion', '/pedids', 'Show/hide ped IDs', {})
-TriggerEvent('chat:addSuggestion', '/vehids', 'Show/hide vehicle IDs', {})
-TriggerEvent('chat:addSuggestion', '/objids', 'Show/hide object IDs', {})
 
 local entityEnumerator = {
 	__gc = function(enum)
@@ -105,17 +101,24 @@ function OnRevealHud()
 	end)
 end
 
-function DrawTags()
-	local myPed = PlayerPedId()
-	local myCoords = GetEntityCoords(myPed)
+function VoiceChatIsPlayerSpeaking(player)
+	return Citizen.InvokeNative(0xEF6F2A35FAAF2ED7, player)
+end
 
+function DrawTags()
 	if ShowPlayerNames or HudIsRevealed then
-		for _, playerId in ipairs(GetActivePlayers()) do
+		for _, playerId in ipairs(ActivePlayers) do
 			local ped = GetPlayerPed(playerId)
 			local pedCoords = GetEntityCoords(ped)
 
-			if #(myCoords - pedCoords) <= TagDrawDistance and not GetPedCrouchMovement(ped) then
-				DrawText3D(pedCoords.x, pedCoords.y, pedCoords.z + 1, GetPlayerName(playerId))
+			if #(MyCoords - pedCoords) <= TagDrawDistance and not GetPedCrouchMovement(ped) then
+				local text = GetPlayerName(playerId)
+
+				if VoiceChatIsPlayerSpeaking(playerId) then
+					text = "~d~Talking: ~s~" .. text
+				end
+
+				DrawText3D(pedCoords.x, pedCoords.y, pedCoords.z + 1, text)
 			end
 		end
 	end
@@ -125,7 +128,7 @@ function DrawTags()
 			if not IsPedAPlayer(ped) then
 				local pedCoords = GetEntityCoords(ped)
 
-				if #(myCoords - pedCoords) <= TagDrawDistance then
+				if #(MyCoords - pedCoords) <= TagDrawDistance then
 					DrawText3D(pedCoords.x, pedCoords.y, pedCoords.z + 1, string.format('ped %x', ped))
 				end
 			end
@@ -136,7 +139,7 @@ function DrawTags()
 		for vehicle in EnumerateVehicles() do
 			local vehCoords = GetEntityCoords(vehicle)
 
-			if #(myCoords - vehCoords) <= TagDrawDistance then
+			if #(MyCoords - vehCoords) <= TagDrawDistance then
 				DrawText3D(vehCoords.x, vehCoords.y, vehCoords.z + 1, string.format('veh %x', vehicle))
 			end
 		end
@@ -146,23 +149,37 @@ function DrawTags()
 		for object in EnumerateObjects() do
 			local objCoords = GetEntityCoords(object)
 
-			if #(myCoords - objCoords) <= TagDrawDistance then
+			if #(MyCoords - objCoords) <= TagDrawDistance then
 				DrawText3D(objCoords.x, objCoords.y, objCoords.z + 1, string.format('obj %x', object))
 			end
 		end
 	end
 end
 
-CreateThread(function()
-	while true do
-		Wait(0)
+Citizen.CreateThread(function()
+	TriggerEvent('chat:addSuggestion', '/playernames', 'Show/hide player names')
+	TriggerEvent('chat:addSuggestion', '/entids', 'Show/hide entity IDs')
+	TriggerEvent('chat:addSuggestion', '/pedids', 'Show/hide ped IDs')
+	TriggerEvent('chat:addSuggestion', '/vehids', 'Show/hide vehicle IDs')
+	TriggerEvent('chat:addSuggestion', '/objids', 'Show/hide object IDs')
+end)
 
-		if IsControlJustPressed(0, 0xCF8A4ECA) then
+Citizen.CreateThread(function()
+	while true do
+		if IsControlJustPressed(0, `INPUT_REVEAL_HUD`) then
 			OnRevealHud()
 		end
 
-		if ShowPlayerNames or ShowPedIds or ShowVehIds or ShowObjIds or HudIsRevealed then
-			DrawTags()
-		end
+		DrawTags()
+
+		Citizen.Wait(0)
+	end
+end)
+
+Citizen.CreateThread(function()
+	while true do
+		ActivePlayers = GetActivePlayers()
+		MyCoords = GetEntityCoords(PlayerPedId())
+		Citizen.Wait(500)
 	end
 end)
